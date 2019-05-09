@@ -1,12 +1,12 @@
-from flask import Flask, Blueprint, Response, request, jsonify
+from flask import Flask, request, jsonify
+from flask_autoindex import AutoIndex
 from exception import ValueBadRequest, JSONExceptionHandler
 from werkzeug.utils import secure_filename
 from checksum import ck
-import os
-import json
 
 app = Flask(__name__)
-handler = JSONExceptionHandler(app)
+AutoIndex(app, browse_root='./data')
+JSONExceptionHandler(app)
 
 
 cache = {
@@ -15,32 +15,32 @@ cache = {
     'md5': {}
 }
 
-@app.route('/checksum', methods=['POST'], strict_slashes=False)
-def checksum():
-    data = request.get_json()
 
-    if data.get('mode') is None:
+@app.route('/checksum', methods=['GET'], strict_slashes=False)
+def checksum():
+    mode = request.args.get('mode')
+    filename = request.args.get('filename')
+    checksum_user = request.args.get('checksum')
+
+    if mode is None:
         raise ValueBadRequest('mode')
-    
-    if data.get('filename') is None:
+
+    if filename is None:
         raise ValueBadRequest('filename')
-    
-    if data.get('checksum') is None:
+
+    if checksum_user is None:
         raise ValueBadRequest('checksum')
 
-    mode = data['mode']
-    filename = data['filename']
-    checksum_user = data['checksum']
     if cache[mode].get(filename) is None:
         cache[mode][filename] = ck('./data/{}'.format(filename), mode)
     checksum_server = cache[mode][filename]
 
     response = {
-        'match':  checksum_user == checksum_server,
+        'match': checksum_user == checksum_server,
         'checksum_user': checksum_user,
         'checksum_server': checksum_server
     }
-    
+
     return jsonify(response)
 
 
@@ -66,7 +66,7 @@ def upload():
     }
 
     return jsonify(response)
-    
+
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=5000)

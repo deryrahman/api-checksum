@@ -1,5 +1,6 @@
 import struct
 
+
 class CRC32():
     def __init__(self):
         self.poly = 0xEDB88320
@@ -17,7 +18,6 @@ class CRC32():
 
 
 class SHA1():
-
     def __init__(self):
         self.buffer_md = [
             0x67452301,
@@ -26,12 +26,7 @@ class SHA1():
             0x10325476,
             0xC3D2E1F0,
         ]
-        self.k = [
-            0x5A827999,
-            0x6ED9EBA1,
-            0x8F1BBCDC,
-            0xCA62C1D6
-        ]
+        self.k = [0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6]
         self.f = [
             lambda b, c, d: (b & c) | (~b & d),
             lambda b, c, d: b ^ c ^ d,
@@ -76,9 +71,10 @@ class SHA1():
                 w.append(struct.unpack(b'>I', block[t * 4:t * 4 + 4])[0])
             else:
                 w.append(
-                    self._roll_left(w[t - 16] ^ w[t - 14] ^ w[t - 8] ^ w[t - 3], 1))
-            a, b, c, d, e = self._basic_op(
-                a, b, c, d, e, w[t], self.k[t // 20], self.f[t // 20])
+                    self._roll_left(
+                        w[t - 16] ^ w[t - 14] ^ w[t - 8] ^ w[t - 3], 1))
+            a, b, c, d, e = self._basic_op(a, b, c, d, e, w[t],
+                                           self.k[t // 20], self.f[t // 20])
 
         a = (a_ori + a) & 0xFFFFFFFF
         b = (b_ori + b) & 0xFFFFFFFF
@@ -101,14 +97,8 @@ class SHA1():
 
 
 class MD5():
-
     def __init__(self):
-        self.buffer_md = [
-            0x67452301,
-            0xEFCDAB89,
-            0x98BADCFE,
-            0x10325476
-        ]
+        self.buffer_md = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476]
         self.t = [
             # round 1
             0xD76AA478,
@@ -181,10 +171,8 @@ class MD5():
         ]
         # 0: F; 1: G; 2: H; 3: I
         self.f = [
-            lambda b, c, d: (b & c) | ((~b) & d),
-            lambda b, c, d: (b & d) | (c & (~d)),
-            lambda b, c, d: b ^ c ^ d,
-            lambda b, c, d: c ^ (b | ~d)
+            lambda b, c, d: (b & c) | ((~b) & d), lambda b, c, d: (b & d) |
+            (c & (~d)), lambda b, c, d: b ^ c ^ d, lambda b, c, d: c ^ (b | ~d)
         ]
         self.s = ([7, 12, 17, 22] * 4) + ([5, 9, 14, 20] * 4) + \
             ([4, 11, 16, 23] * 4) + ([6, 10, 15, 21] * 4)
@@ -225,14 +213,14 @@ class MD5():
             if i < 16:
                 k = i
             elif i < 32:
-                k = (5*i+1) % 16
+                k = (5 * i + 1) % 16
             elif i < 48:
-                k = (3*i+5) % 16
+                k = (3 * i + 5) % 16
             else:
-                k = (7*i) % 16
+                k = (7 * i) % 16
 
-            a, b, c, d = self._basic_op(
-                a, b, c, d, w[k], self.t[i], self.s[i], self.f[i // 16])
+            a, b, c, d = self._basic_op(a, b, c, d, w[k], self.t[i], self.s[i],
+                                        self.f[i // 16])
 
         a = (a_ori + a) & 0xFFFFFFFF
         b = (b_ori + b) & 0xFFFFFFFF
@@ -251,15 +239,11 @@ class MD5():
         res = struct.pack('<IIII', a, b, c, d)
         return res.hex()
 
+
 def ck(path, mode):
-    c = {
-        'crc32': CRC32(),
-        'sha1': SHA1(),
-        'md5': MD5()
-    }.get(mode)
-    
+    c = {'crc32': CRC32(), 'sha1': SHA1(), 'md5': MD5()}.get(mode)
+
     with open(path, 'rb') as f:
         res = c(f.read())
 
     return res
-    
