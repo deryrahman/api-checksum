@@ -10,8 +10,14 @@ class CRC32():
         crc = 0xFFFFFFFF
         for d in data:
             crc = crc ^ d
-            for _ in range(8):
-                crc = (crc >> 1) ^ (self.poly & -(crc & 1))
+            crc = (crc >> 1) ^ (self.poly & -(crc & 1))
+            crc = (crc >> 1) ^ (self.poly & -(crc & 1))
+            crc = (crc >> 1) ^ (self.poly & -(crc & 1))
+            crc = (crc >> 1) ^ (self.poly & -(crc & 1))
+            crc = (crc >> 1) ^ (self.poly & -(crc & 1))
+            crc = (crc >> 1) ^ (self.poly & -(crc & 1))
+            crc = (crc >> 1) ^ (self.poly & -(crc & 1))
+            crc = (crc >> 1) ^ (self.poly & -(crc & 1))
         res = 0xFFFFFFFF & ~crc
         res = struct.pack('>I', res)
         return res.hex()
